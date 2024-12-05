@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cadastro de Usuário</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f4f4f4;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    h1 {
+      color: #0056b3;
+    }
+
+    .form-container {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+      width: 300px;
+    }
+
+    .form-container input {
+      width: 100%;
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+    }
+
+    .form-container button {
+      width: 100%;
+      background-color: #0056b3;
+      color: white;
+      padding: 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background-color 0.3s;
+    }
+
+    .form-container button:hover {
+      background-color: #004494;
+    }
+  </style>
+</head>
+<body>
+  <h1>Cadastro de Usuário</h1>
+
+  <div class="form-container">
+    <form id="userForm">
+      <input type="text" id="userName" placeholder="Nome" required>
+      <input type="email" id="userEmail" placeholder="Email" required>
+      <button type="submit">Cadastrar</button>
+    </form>
+  </div>
+
+  <script>
+    const userForm = document.getElementById('userForm');
+
+    userForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const userName = document.getElementById('userName').value;
+      const userEmail = document.getElementById('userEmail').value;
+
+      // Verifica se os campos estão preenchidos
+      if (!userName || !userEmail) {
+        alert("Por favor, preencha todos os campos.");
+        return;
+      }
+
+      // Armazena as informações do usuário (aqui apenas no localStorage para o exemplo)
+      const userId = Date.now(); // ID gerado a partir do timestamp
+      localStorage.setItem('user', JSON.stringify({ userId, userName, userEmail }));
+
+      // Redireciona para o gerenciamento de tarefas
+      window.location.href = "index.html"; // Corrigido para redirecionar para index.html
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gerenciamento de Tarefas - Kanban</title>
+  <style>
+    /* Configurações de fonte e cores */
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f4f4f4;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 0;
+      padding: 0;
+    }
+    
+    h1 {
+      color: #0056b3;
+      margin: 20px;
+      font-size: 2rem;
+    }
+
+    /* Estilização do formulário */
+    .form-container {
+      max-width: 600px;
+      width: 100%;
+      background-color: #ffffff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+      margin: 20px;
+    }
+
+    .form-container h2 {
+      font-size: 1.5rem;
+      color: #0056b3;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .form-container input, 
+    .form-container select, 
+    .form-container button {
+      width: 100%;
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+    }
+
+    .form-container button {
+      background-color: #0056b3;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .form-container button:hover {
+      background-color: #004494;
+    }
+
+    /* Estilização da tabela de tarefas */
+    .task-table {
+      width: 90%;
+      max-width: 1200px;
+      margin-top: 30px;
+      border-collapse: collapse;
+    }
+
+    .task-table th, .task-table td {
+      padding: 12px;
+      text-align: center;
+      border: 1px solid #ddd;
+    }
+
+    .task-table th {
+      background-color: #0056b3;
+      color: white;
+    }
+
+    .task-table td {
+      background-color: #fff;
+    }
+
+    .task-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .task-buttons button {
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: background-color 0.3s;
+    }
+
+    .task-buttons .edit-btn {
+      background-color: #0056b3;
+      color: white;
+    }
+
+    .task-buttons .edit-btn:hover {
+      background-color: #004494;
+    }
+
+    .task-buttons .delete-btn {
+      background-color: #d32f2f;
+      color: white;
+    }
+
+    .task-buttons .delete-btn:hover {
+      background-color: #b71c1c;
+    }
+
+    .task-buttons .status-btn {
+      background-color: #ffa000;
+      color: white;
+    }
+
+    .task-buttons .status-btn:hover {
+      background-color: #ff8f00;
+    }
+  </style>
+</head>
+<body>
+  <h1>Gerenciamento de Tarefas - Kanban</h1>
+  
+  <!-- Formulário de Adição de Tarefas -->
+  <div class="form-container">
+    <h2>Adicionar/Editar Tarefa</h2>
+    <form id="taskForm">
+      <input type="hidden" id="taskId">
+      <input type="text" id="taskDescription" placeholder="Descrição da Tarefa" required>
+      <input type="text" id="departmentName" placeholder="Nome do Setor" required>
+      
+      <!-- Seleção de Usuário -->
+      <select id="userId" required>
+        <option value="">Selecione o Usuário</option>
+        <option value="1">Usuário 1</option>
+        <option value="2">Usuário 2</option>
+        <option value="3">Usuário 3</option>
+      </select>
+      
+      <select id="priority" required>
+        <option value="">Prioridade</option>
+        <option value="Baixa">Baixa</option>
+        <option value="Média">Média</option>
+        <option value="Alta">Alta</option>
+      </select>
+      
+      <!-- Status da Tarefa -->
+      <select id="status" required>
+        <option value="">Selecione o Status</option>
+        <option value="A Fazer">A Fazer</option>
+        <option value="Fazendo">Fazendo</option>
+        <option value="Pronto">Pronto</option>
+      </select>
+      
+      <button type="submit">Salvar Tarefa</button>
+    </form>
+  </div>
+
+  <!-- Tabela de Tarefas -->
+  <table class="task-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Descrição</th>
+        <th>Setor</th>
+        <th>Prioridade</th>
+        <th>Status</th>
+        <th>Usuário</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody id="taskTableBody">
+      <!-- Tarefas serão exibidas aqui -->
+    </tbody>
+  </table>
+
+  <script>
+    const taskForm = document.getElementById('taskForm');
+    const taskTableBody = document.getElementById('taskTableBody');
+
+    taskForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const taskId = document.getElementById('taskId').value || Date.now();
+      const taskDescription = document.getElementById('taskDescription').value;
+      const departmentName = document.getElementById('departmentName').value;
+      const userId = document.getElementById('userId').value;
+      const priority = document.getElementById('priority').value;
+      const status = document.getElementById('status').value;
+
+      if (!taskDescription || !departmentName || !userId || !priority || !status) {
+        alert("Por favor, preencha todos os campos.");
+        return;
+      }
+
+      let taskRow = document.querySelector(`tr[data-id='${taskId}']`);
+
+      if (!taskRow) {
+        taskRow = document.createElement('tr');
+        taskRow.dataset.id = taskId;
+        taskTableBody.appendChild(taskRow);
+      }
+
+      taskRow.innerHTML = `
+        <td>${taskId}</td>
+        <td>${taskDescription}</td>
+        <td>${departmentName}</td>
+        <td style="color: ${
+          priority === 'Alta' ? '#d32f2f' : priority === 'Média' ? '#ffa000' : '#388e3c'
+        };">${priority}</td>
+        <td>${status}</td>
+        <td>${userId}</td>
+        <td class="task-buttons">
+          <button class="edit-btn" onclick="editTask(${taskId})">Editar</button>
+          <button class="delete-btn" onclick="deleteTask(${taskId})">Excluir</button>
+          <button class="status-btn" onclick="changeStatus(${taskId})">Alterar Status</button>
+        </td>
+      `;
+
+      taskForm.reset();
+    });
+
+    function deleteTask(taskId) {
+      document.querySelector(`tr[data-id='${taskId}']`).remove();
+    }
+
+    function editTask(taskId) {
+      const taskRow = document.querySelector(`tr[data-id='${taskId}']`);
+      document.getElementById('taskId').value = taskId;
+      document.getElementById('taskDescription').value = taskRow.children[1].textContent;
+      document.getElementById('departmentName').value = taskRow.children[2].textContent;
+      document.getElementById('priority').value = taskRow.children[3].textContent.trim();
+      document.getElementById('status').value = taskRow.children[4].textContent.trim();
+      document.getElementById('userId').value = taskRow.children[5].textContent.trim();
+    }
+
+    function changeStatus(taskId) {
+      const newStatus = prompt("Digite o novo status (A Fazer, Fazendo, Pronto):");
+      if (["A Fazer", "Fazendo", "Pronto"].includes(newStatus)) {
+        document.querySelector(`tr[data-id='${taskId}'] td:nth-child(5)`).textContent = newStatus;
+      } else {
+        alert("Status inválido!");
+      }
+    }
+  </script>
+</body>
+</html>
